@@ -5,6 +5,7 @@ from .FMeasure import FMeasure
 from .BCubed import BCubed
 
 Indices = [
+    ITI.AvgNMI,
     ITI.MaxNMI,
     ITI.VariationOfInformation,
     ITI.FairNMI,
