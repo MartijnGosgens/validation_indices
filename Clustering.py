@@ -129,38 +129,43 @@ class Clustering(list):
 
 class HierarchicalClustering(Clustering):
     # Clustering but with additional list with sets of vertices that are represented by the aggregate-vertex.
-    def __init__(self, clustering_list,subclusters=[]):
+    def __init__(self, clustering_list,previouslevel=None):
         super().__init__(clustering_list)
         self.clusters = {}
         for i, c in enumerate(clustering_list):
             if not c in self.clusters:
                 self.clusters[c] = set()
             self.clusters[c]=self.clusters[c].union({i})
-        if len(subclusters)==0:
-            subclusters = [
-                {i} for i in range(len(clustering_list))
-            ]
-        self.subclusters = subclusters
+        self.previouslevel = previouslevel
         
     # Override
     def copy(self):
         c = super().copy()
-        return HierarchicalClustering(c,self.subclusters.copy())
+        return HierarchicalClustering(c,self.previouslevel.copy())
     
     # Override
     def partition(self):
-        top_partition = super().partition()
-        return [
-            set.union(*[
-                self.subclusters[i]
-                for i in cluster
-            ])
-            for cluster in top_partition
-        ]
-    
+        return Clustering(self).partition()
+
     def nextlevel(self):
         partition = self.partition()
-        return HierarchicalClustering(list(range(len(partition))),partition)
+        return HierarchicalClustering(list(range(len(partition))),self)
+    
+    def level(self, lvl):
+        if self.previouslevel == None:
+            return self
+        if lvl <= 0:
+            return self.flatClustering()
+        return self.previouslevel.level(lvl-1)
     
     def flatClustering(self):
-        return Clustering.FromPartition(self.nextlevel().subclusters)
+        if self.previouslevel == None:
+            return self
+        subpartition = self.previouslevel.flatClustering().partition()
+        return Clustering.FromPartition([
+            set().union(*[
+                subpartition[i]
+                for i in p
+            ])
+            for p in self.partition()
+        ])
