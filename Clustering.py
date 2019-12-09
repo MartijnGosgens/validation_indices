@@ -169,3 +169,11 @@ class HierarchicalClustering(Clustering):
             ])
             for p in self.partition()
         ])
+    
+    def getlevels(self):
+        levels = []
+        lvl = self
+        while not lvl==None:
+            levels.append(lvl.flatClustering())
+            lvl = lvl.previouslevel
+        return levels
