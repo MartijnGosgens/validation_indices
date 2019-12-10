@@ -1,4 +1,5 @@
 import numpy as np
+import itertools as iter
 
 class Clustering(list):
     def __init__(self, clustering_list):
@@ -170,10 +171,28 @@ class HierarchicalClustering(Clustering):
             for p in self.partition()
         ])
     
-    def getlevels(self):
+    # Returns the Clusterings corresponding to each level of the hierarchy
+    def getlevels(self, flat=True):
         levels = []
         lvl = self
         while not lvl==None:
-            levels.append(lvl.flatClustering())
+            if flat:
+                levels.append(lvl.flatClustering())
+            else:
+                levels.append(lvl)
             lvl = lvl.previouslevel
         return levels
+        
+    # Returns all intra_pairs that are not in the previous level
+    def new_intra_pairs(self):
+        if self.previouslevel == None:
+            return set().union(*[
+                iter.combinations(p,2)
+                for p in self.partition()
+            ])
+        previouspartition = self.previouslevel.partition()
+        return set().union(*[
+            set(iter.product(previouspartition[i],previouspartition[j]))
+            for c in self.clusters.values()
+            for i,j in iter.combinations(c,2)
+        ])
