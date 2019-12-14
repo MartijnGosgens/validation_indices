@@ -20,3 +20,20 @@ Indices = [
     FMeasure,
     BCubed
 ]
+
+NamedIndices = {
+    'NMI': ITI.AvgNMI,
+    'MaxNMI': ITI.MaxNMI,
+    'VI': ITI.VariationOfInformation,
+    'FNMI': ITI.FairNMI,
+    'Rand': PCI.RandIndex,
+    'ARI': PCI.AdjustedRandIndex,
+    'Jaccard': PCI.JaccardIndex,
+    'Dice': PCI.DiceIndex,
+    'Wallace': PCI.WallaceIndex,
+    'S&S1': PCI.SokalAndSneath1,
+    'CC': PCI.PearsonCoefficient,
+    'CD': PCI.CorrelationDistance,
+    'FM': FMeasure,
+    'BCubed': BCubed
+}

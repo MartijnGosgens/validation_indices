@@ -186,13 +186,17 @@ class HierarchicalClustering(Clustering):
     # Returns all intra_pairs that are not in the previous level
     def new_intra_pairs(self):
         if self.previouslevel == None:
-            return set().union(*[
-                iter.combinations(p,2)
+            return set().union(*[{
+                    (min(e),max(e))
+                    for e in iter.combinations(p,2)
+                }
                 for p in self.partition()
             ])
         previouspartition = self.previouslevel.partition()
-        return set().union(*[
-            set(iter.product(previouspartition[i],previouspartition[j]))
+        return set().union(*[{
+                (min(e),max(e))
+                for e in iter.product(previouspartition[i],previouspartition[j])
+            }
             for c in self.clusters.values()
             for i,j in iter.combinations(c,2)
         ])
