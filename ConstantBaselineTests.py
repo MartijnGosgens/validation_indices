@@ -29,27 +29,19 @@ def bias_chisquare(I, gt, sizes2compare, repeats=100, rand=None):
         for i in range(len(sizes2compare))
     ]
 
-    contingencies = [
+    score_evaluations = [
         [
-            Contingency(
-                gt,
-                Clustering.FromSizes(sizes).random_same_sizes(rand)
-            )
+            I.score(gt, Clustering.FromSizes(sizes).random_same_sizes(rand))
             for sizes in sizes2compare
         ]
         for _ in range(repeats)
     ]
-    score_evaluations = [
-        [
-            I.score_comparison(c)
-            for c in sample
-        ]
-        for sample in contingencies
-    ]
+    # For each repeat, check which sizes achieved the highest score
     winners = appendCounter(Counter([
         sample.index(max(sample))
         for sample in score_evaluations
     ]))
+    # return the p value and the sizes that 'won' most often
     return {
         'p': chisquare(winners).pvalue,
         'bestsizes': sizes2compare[winners.index(max(winners))]
@@ -86,6 +78,7 @@ def bias_anova(I, gt, sizes2compare, repeats=100, rand=None):
         for i, evals in enumerate(score_evaluations)
     }
 
+    # return the p value and the sizes that has the highest average.
     return {
         'p': f_oneway(*score_evaluations).pvalue,
         'bestsizes': sizes2compare[max(avgs, key=avgs.get)]
