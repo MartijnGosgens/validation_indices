@@ -19,11 +19,11 @@ class Clustering(list):
         if len(self.clusters[self[key]]) == 0:
             del self.clusters[self[key]]
         super(Clustering, self).__setitem__(key, value)
-        
+
     # Override
     def copy(self):
         return Clustering(super().copy())
-        
+
     def labels(self):
         return set(self)
 
@@ -111,10 +111,13 @@ class Clustering(list):
                 return Clustering.FromPartition(A)
         print('Clustering.FromAnything was unable to cast {}'.format(A))
 
-    def BalancedClustering(n, k):
+    def BalancedSizes(n, k):
         smallSize = int(n/k)
         n_larger = n - k * smallSize
-        return Clustering.FromSizes([smallSize + 1] * n_larger + [smallSize] * (k - n_larger))
+        return [smallSize + 1] * n_larger + [smallSize] * (k - n_larger)
+
+    def BalancedClustering(n, k):
+        return Clustering.FromSizes(Clustering.BalancedSizes(n, k))
 
     def random_same_sizes(self, rand=None):
         if rand == None:
@@ -138,12 +141,12 @@ class HierarchicalClustering(Clustering):
                 self.clusters[c] = set()
             self.clusters[c]=self.clusters[c].union({i})
         self.previouslevel = previouslevel
-        
+
     # Override
     def copy(self):
         c = super().copy()
         return HierarchicalClustering(c,self.previouslevel.copy())
-    
+
     # Override
     def partition(self):
         return Clustering(self).partition()
@@ -151,14 +154,14 @@ class HierarchicalClustering(Clustering):
     def nextlevel(self):
         partition = self.partition()
         return HierarchicalClustering(list(range(len(partition))),self)
-    
+
     def level(self, lvl):
         if self.previouslevel == None:
             return self
         if lvl <= 0:
             return self.flatClustering()
         return self.previouslevel.level(lvl-1)
-    
+
     def flatClustering(self):
         if self.previouslevel == None:
             return self
@@ -170,7 +173,7 @@ class HierarchicalClustering(Clustering):
             ])
             for p in self.partition()
         ])
-    
+
     # Returns the Clusterings corresponding to each level of the hierarchy
     def getlevels(self, flat=True):
         levels = []
@@ -182,7 +185,7 @@ class HierarchicalClustering(Clustering):
                 levels.append(lvl)
             lvl = lvl.previouslevel
         return levels
-        
+
     # Returns all intra_pairs that are not in the previous level
     def new_intra_pairs(self):
         if self.previouslevel == None:
