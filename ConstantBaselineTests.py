@@ -10,7 +10,7 @@ def bias_chisquare(I, gt, sizes2compare, repeats=100, rand=None):
     the sizes will have the same probability of achieving the maximum score
     (among the sizes).
 
-    Parameters:
+    Parameters
     -------
     I : Score
         The validation index that is tested
@@ -60,7 +60,7 @@ def bias_anova(I, gt, sizes2compare, repeats=100, rand=None):
     Uses one-way ANOVA for the null-hypothesis that for all of the sizes give
     the same expected score of the index.
 
-    Parameters:
+    Parameters
     -------
     I : Score
         The validation index that is tested
@@ -97,7 +97,7 @@ def check_constant_baseline(I, repeats=100, ns=None, rand=None):
     For each value n:ns we compare balanced clusterings with n^0.25,n^0.5 and
     n^0.75 equal-sized clusters.
 
-    Parameters:
+    Parameters
     -------
     I : Score
         The validation index that is tested
@@ -107,6 +107,12 @@ def check_constant_baseline(I, repeats=100, ns=None, rand=None):
         A list containing the numbers of vertices for which the test is performed.
     rand : numpy.random.RandomState
         Used for making the generation of clusterings reproducable.
+
+    Returns
+    -------
+    dict
+        Keys represent the values for n and the values correspond the confidence
+        at which the constant baseline hypothesis is rejected by the ANOVA test.
     '''
     if ns == None:
         ns = range(50, 1001, 50)
