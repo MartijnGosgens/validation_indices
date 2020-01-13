@@ -25,70 +25,6 @@ def GeneralizedMean(a, b, r=1):
     if r<0 and (a==0 or b==0):
         return 0
 
-class RelationContingency(dict):
-    def __init__(self, N00, N01, N10, N11):
-        self.N00 = N00
-        self.N01 = N01
-        self.N10 = N10
-        self.N11 = N11
-        super().__init__({'N00':N00, 'N01':N01, 'N10':N10, 'N11':N11})
-        self.N = sum(self.values())
-        self.mA = N11 + N10
-        self.mB = N11 + N01
-
-    def FromRelations(a, b):
-        # assuming both a and b are symmetric with the same vertices
-        n = len(a.vertices)
-        N = int(n * (n - 1) / 2)
-        if type(a)==EquivalenceRelation and type(b)==EquivalenceRelation:
-            classes1 = list(set(a.class_list))
-            classes2 = list(set(b.class_list))
-            cont=np.zeros([len(classes1),len(classes2)])
-            for c1,c2 in zip(a.class_list, b.class_list):
-                cont[classes1.index(c1), classes2.index(c2)] += 1
-            N11 = np.square(cont).sum()/2-n/2
-            N10 = len(a) - N11
-            N01 = len(b) - N11
-            N00 = N - N01 - N10 - N11
-            return RelationContingency(N00, N01, N10, N11)
-        else:
-            setA = a.set_representation()
-            setB = b.set_representation()
-            N11 = len(setA & setB)
-            N10 = len(setA - setB)
-            N01 = len(setB - setA)
-            N00 = N - N01 - N10 - N11
-            return RelationContingency(N00, N01, N10, N11)
-
-    def interchangeAB(self):
-        return RelationContingency(N00=N00, N01=N10, N10=N01, N11=N11)
-
-    def invertA(self):
-        return RelationContingency(N00=N10, N01=N11, N10=N00, N11=N01)
-
-    def invertB(self):
-        return RelationContingency(N00=N01, N01=N00, N10=N11, N11=N10)
-
-    def invertAB(self):
-        return RelationContingency(N00=N11, N01=N10, N10=N01, N11=N00)
-
-    def entropy(self, q=1):
-        dist = np.array(list(self.values())) / self.N
-        return Entropy(dist, q)
-
-    def GenerateErdosRenyi(p, q, n_pairs):
-        return RelationContingency(*np.array(
-            rand.multinomial(
-                n_pairs,
-                [(1-p)*(1-q),(1-p)*q,p*(1-q),p*q]
-            ),
-            dtype = float
-        ))
-
-    def GenerateFromRelationSizes(mA, mB, n_pairs):
-        N11 = float(rand.binomial(min(mA, mB), max(mA, mB)/n_pairs))
-        return RelationContingency(n_pairs - mA - mB + N11, mA-N11, mB-N11, N11)
-
 class Contingency(dict):
     def __init__(self, A, B):
         self.A = Clustering.FromAnything(A)
@@ -108,7 +44,7 @@ class Contingency(dict):
 
 class Score:
     isdistance = False
-    
+
     @classmethod
     def score(cls, A, B):
         pass
@@ -137,7 +73,7 @@ class PairCounts(dict):
         N = int(n*(n-1)/2)
         N00 = N-N11-N10-N01
         return PairCounts(N00, N01, N10, N11)
-    
+
     def adjacent_counts(self):
         all_directions = {
             "add disagreeing": PairCounts(
