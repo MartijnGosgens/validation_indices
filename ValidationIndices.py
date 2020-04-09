@@ -2,6 +2,7 @@ from .Clustering import Clustering
 import numpy as np
 import networkx as nx
 import math
+import itertools as iter
 
 # Resolve division by zero
 def Fraction(numerator, denominator):

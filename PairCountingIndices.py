@@ -33,6 +33,10 @@ class WallaceIndex(PairCountingScore):
     def paircounting_score(N10, N11, **kwargs):
         return Fraction(N11, N11 + N10)
 
+class MinWallace(PairCountingScore):
+    def paircounting_score(N10,N01, N11, **kwargs):
+        return min(Fraction(N11, N11 + N10),Fraction(N11, N11 + N01))
+
 class FowlkesAndMallowIndex(PairCountingScore):
     def paircounting_score(N01, N10, N11, **kwargs):
         return Fraction(N11,

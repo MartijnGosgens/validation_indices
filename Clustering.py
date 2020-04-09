@@ -58,6 +58,14 @@ class Clustering(list):
             for size in self.sizes()
         ])
 
+    def intra_pairs_iter(self):
+        for c in self.clusters.values():
+            for i,j in iter.combinations(c,2):
+                yield (i,j)
+
+    def density(self):
+        return self.intra_pairs() / ((len(self)*(len(self)-1))/2)
+
     def partition(self):
         return list(self.clusters.values())
 
@@ -145,7 +153,10 @@ class HierarchicalClustering(Clustering):
     # Override
     def copy(self):
         c = super().copy()
-        return HierarchicalClustering(c,self.previouslevel.copy())
+        previous = self.previouslevel
+        if previous != None:
+            previous = previous.copy()
+        return HierarchicalClustering(c,previous)
 
     # Override
     def partition(self):
@@ -202,4 +213,13 @@ class HierarchicalClustering(Clustering):
             }
             for c in self.clusters.values()
             for i,j in iter.combinations(c,2)
+        ])
+
+    def flatitems(self, topitems):
+        if self.previouslevel == None:
+            return topitems
+        P = self.previouslevel.partition()
+        return set().union(*[
+            self.previouslevel.flatitems(P[i])
+            for i in topitems
         ])
