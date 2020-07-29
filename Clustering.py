@@ -75,11 +75,12 @@ class Clustering(list):
         ]
 
     def Meet(A, B):
-        return {
-            (i,j): Ai.intersection(Bj)
-            for i,Ai in enumerate(A.partition())
-            for j,Bj in enumerate(B.partition())
-        }
+        meet = {}
+        for i in range(len(A)):
+            if not (A[i],B[i]) in meet:
+                meet[A[i],B[i]] = set()
+            meet[A[i],B[i]].add(i)
+        return meet
 
     # Operator overload of A*B will return the meet of the clusterings.
     def __mul__(self,other):
