@@ -31,7 +31,7 @@ def bias_chisquare(I, gt, sizes2compare, repeats=100, rand=None):
 
     score_evaluations = [
         [
-            I.score(gt, Clustering.FromSizes(sizes).random_same_sizes(rand))
+            I.score(gt, Clustering.FromSizes(sizes).random_same_sizes(rand)) * (-1 if I.isdistance else 1)
             for sizes in sizes2compare
         ]
         for _ in range(repeats)
@@ -68,7 +68,7 @@ def bias_anova(I, gt, sizes2compare, repeats=100, rand=None):
     '''
     score_evaluations = [
         [
-            I.score(gt, Clustering.FromSizes(sizes).random_same_sizes(rand))
+            I.score(gt, Clustering.FromSizes(sizes).random_same_sizes(rand)) * (-1 if I.isdistance else 1)
             for _ in range(repeats)
         ]
         for sizes in sizes2compare

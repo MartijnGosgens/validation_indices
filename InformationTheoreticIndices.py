@@ -26,6 +26,7 @@ class InformationTheoreticScore(ContingencyScore):
         return cls.contingency_score(entropyA=entropyA, entropyB=entropyB, entropyJoint=entropyJoint, contingency=cont, **kwargs)
 
 class VariationOfInformation(InformationTheoreticScore):
+    isdistance = True
     @classmethod
     def contingency_score(cls, entropyA, entropyB, entropyJoint, **kwargs):
         return 2*entropyJoint - entropyA - entropyB
