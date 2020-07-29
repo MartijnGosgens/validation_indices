@@ -14,8 +14,8 @@ def bias_chisquare(I, gt, sizes2compare, repeats=100, rand=None):
     -------
     I : Score
         The validation index that is tested
-    gt : Clusterings
-        The ground truth partition
+    gt : list or Clustering
+        The ground truth clustering
     sizes2compare : list
         A list containing the clustersizes that we want to compare. Each
         clustersizes should be represented by a list of integers summing len(gt).
@@ -57,8 +57,8 @@ def bias_anova(I, gt, sizes2compare, repeats=100, rand=None):
     I : Score
         The validation index that is tested
     gt : Clusterings
-        The ground truth partition
-    sizes2compare : list
+        The ground truth clustering
+    sizes2compare : list of lists
         A list containing the clustersizes that we want to compare. Each
         clustersizes should be represented by a list of integers summing len(gt).
     repeats : int
@@ -81,10 +81,11 @@ def bias_anova(I, gt, sizes2compare, repeats=100, rand=None):
     # return the p value and the sizes that has the highest average.
     return {
         'p': f_oneway(*score_evaluations).pvalue,
+        'bestsizes_index': max(avgs, key=avgs.get),
         'bestsizes': sizes2compare[max(avgs, key=avgs.get)]
     }
 
-def check_constant_baseline(I, repeats=100, ns=None, rand=None):
+def check_constant_baseline(I, repeats=500, aggregate=True, n2gtk=None, n2ks=None, rand=None):
     '''
     Uses one-way ANOVA to statistally test the hypothesis of a constant baseline.
     For each value n:ns we compare balanced clusterings with n^0.25,n^0.5 and
@@ -96,24 +97,44 @@ def check_constant_baseline(I, repeats=100, ns=None, rand=None):
         The validation index that is tested
     repeats : int
         The number of clusterings generated from each clustersizes distribution.
-    ns: list
-        A list containing the numbers of vertices for which the test is performed.
+    aggregate : bool
+        If True, we combine the results for the various n into one statistical
+        test using Fisher's method.
+    n2gtk: dict
+        A dictionary from n to the number of ground truth clusters
+    n2ks: dict
+        A dictionary from n to a list of the number of clusters for each of the candidates.
     rand : numpy.random.RandomState
         Used for making the generation of clusterings reproducable.
 
     Returns
     -------
     dict
-        Keys represent the values for n and the values correspond the confidence
-        at which the constant baseline hypothesis is rejected by the ANOVA test.
+        If aggregate==True, we return a dictionary with the keys "constant baseline p"
+        and "best candidate index". Otherwise, that maps n to the result of the
+        statistical test for that n (also represented as a dictionary with these two keys).
+        The p-values correspond to the condidence level at which the constant
+        baseline hypothesis is rejected by the ANOVA test.
     '''
-    if ns == None:
-        ns = range(50, 1001, 50)
+    if aggregate:
+        # Better get the import error before performing the whole experiment
+        from scipy.stats import combine_pvalues
 
-    n2ks = {
-        n: [int(n**0.25),int(n**0.5),int(n**0.75)]
-        for n in ns
-    }
+    if n2gtk == None and n2ks == None:
+        # Choose n=50,100,150,...,1000
+        ns = range(50, 1001, 50)
+        # For each n, we consider balanced cluster sizes with k=sqrt(n) clusters.
+        n2gtk = {
+            n: int(n**0.5)
+            for n in ns
+        }
+        # For each n, we consider candidates with balanced cluster sizes with
+        # k1=n^0.25, k2=n^0.5, k3=n^0.75.
+        n2ks = {
+            n: [int(n**0.25),int(n**0.5),int(n**0.75)]
+            for n in ns
+        }
+
     n2sizes = {
         n: [
             Clustering.BalancedSizes(n, k)
@@ -122,11 +143,33 @@ def check_constant_baseline(I, repeats=100, ns=None, rand=None):
         for n,ks in n2ks.items()
     }
     n2gt = {
-        n: Clustering.BalancedClustering(n, int(n**0.5))
-        for n in ns
+        n: Clustering.BalancedClustering(n, k)
+        for n,k in n2gtk.items()
     }
 
-    return {
-        n: bias_anova(I, n2gt[n], n2sizes[n], repeats, rand)['p']
-        for n in ns
+    n2results = {
+        n: bias_anova(I, n2gt[n], n2sizes[n], repeats, rand)
+        for n in n2gtk.keys()
     }
+    if not aggregate:
+        return {
+            n: {
+                'constant baseline p': results['p'],
+                'best candidate index': results['bestsizes_index']
+            }
+            for n, results in n2results.items()
+        }
+    else:
+        # Use Fisher's method to combine the p-values.
+        counts = {}
+        ps = []
+        for n,result in n2results.items():
+            ps.append(result['p'])
+            best = result['bestsizes_index']
+            if not best in counts:
+                counts[best] = 0
+            counts[best] += 1
+        return {
+            'constant baseline p': combine_pvalues(ps)[1],
+            'best candidate index': max(counts, key=counts.get)
+        }
