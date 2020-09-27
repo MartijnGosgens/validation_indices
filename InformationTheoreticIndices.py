@@ -1,7 +1,7 @@
 import numpy as np
 
 from .Clustering import Clustering
-from .ValidationIndices import Contingency, ContingencyScore, Fraction
+from .ValidationIndices import Contingency, ContingencyScore, Fraction, Score
 
 # Tsallis generalized q-entropy. Regular Shannon entropy for q in the limit to 1 (q=1, works here)
 # For q=2, the VI induced by this entropy is equal to the adjusted Mirkin metric.
@@ -73,3 +73,9 @@ class FairNMI(NormalizedMutualInformation):
         R = len(contingency.sizesA)
         S = len(contingency.sizesB)
         return np.exp(abs(R-S)/R)*(entropyA + entropyB) / 2
+
+from sklearn.metrics import adjusted_mutual_info_score
+class AdjustedMutualInformation(Score):
+    @classmethod
+    def score(cls, A, B):
+        return adjusted_mutual_info_score(A,B)
