@@ -9,16 +9,18 @@ class FMeasure(ContingencyScore):
         recall = sum([
             max([
                 contingency[i,j]
-                for j in range(len(contingency.sizesB))
+                for j in contingency.B.labels()
+                if (i,j) in contingency
             ])
-            for i in range(len(contingency.sizesA))
+            for i in contingency.A.labels()
         ]) / contingency.n
         precision = sum([
             max([
                 contingency[i,j]
-                for i in range(len(contingency.sizesA))
+                for i in contingency.A.labels()
+                if (i,j) in contingency
             ])
-            for j in range(len(contingency.sizesB))
+            for j in contingency.B.labels()
         ]) / contingency.n
         return 2*Fraction(recall*precision, recall + precision)
 
