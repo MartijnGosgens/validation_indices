@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans, AffinityPropagation, MeanShift, estimate_ban
 from sklearn.cluster import DBSCAN, OPTICS, cluster_optics_dbscan, Birch
 from sklearn.mixture import GaussianMixture
 
-DIR = 'datasets_clusterized'
+DIR = 'datasets_parsed'
 
 np.random.seed(0)
 
@@ -40,7 +40,7 @@ def do_birch(ft, nc):
 
 def save_res(r,fn,label):
 	if len(set(r))>1:
-		with open(fn[:-3]+"."+label,'w') as ofh:
+		with open(fn[:-3].replace('datasets_parsed','datasets_clusterized')+"."+label,'w') as ofh:
 			for item in r:
 				print(item, file=ofh)
 

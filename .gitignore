@@ -1,1 +1,4 @@
 __pycache__
+datasets_experiments/datasets
+datasets_experiments/datasets_clusterized
+datasets_experiments/datasets_parsed

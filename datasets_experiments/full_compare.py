@@ -9,11 +9,11 @@ def load_partition(fn):
         partition.append( int(line.rstrip()) )
     return partition
 
-def pt2vector(pt):
-	return partition
+#def pt2vector(pt):
+#	return partition
 
 gts = dict()
-for fn in glob('datasets_clusterized/*.gt'):
+for fn in glob('datasets_parsed/*.gt'):
 	handle = fn.split('\\')[-1].replace(".gt","")
 	gts[handle] = load_partition(fn)
 
