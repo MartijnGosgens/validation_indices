@@ -78,4 +78,5 @@ from sklearn.metrics import adjusted_mutual_info_score
 class AdjustedMutualInformation(Score):
     @classmethod
     def score(cls, A, B):
+        A, B = (Clustering.FromAnything(C) for C in [A,B])
         return adjusted_mutual_info_score(A,B)
