@@ -31,8 +31,26 @@ rule4 = {
     "R": Clustering([2, 0, 0, 0, 0, 1, 0, 2, 0])
 }
 rules = [rule1,rule2,rule3,rule4]
-markers = ["o","s","v","D"]
-colors = ['red','green','blue','purple']
+
+def minimize(C):
+    mapping = {}
+    minimized = []
+    for c in C:
+        if c not in mapping:
+            mapping[c] = len(mapping)
+        minimized.append(mapping[c])
+    return minimized
+from .rules_bruteforce.check_minimum_coverage import rules as checked_rules
+rules = [
+    {
+        "gt": Clustering(minimize(gt)),
+        "L": Clustering(minimize(L)),
+        "R": Clustering(minimize(R))
+    }
+    for (gt,L,R,_) in checked_rules
+]
+markers = ["o","s","v","D","P",'*']
+colors = ['red','green','blue','purple','yellow','orange']
 
 # Plot a pair of ground truth and candidate. The markers denote the ground truth
 # clustering while the colored regions denote the candidate clustering.
@@ -52,25 +70,44 @@ def plot_clusterings(gt,candidate,layout,ax=None,buffer=0.16):
 
 # We construct overlapping partition and compute its graph layout to find a
 # reasonable placement of the items such that the regions of don't overlap.
-def graph_layout(L,R):
+def graph_layout(L,R,k=0.1,seed=0,weightL=1,weightR=1):
     G = nx.Graph()
-    G.add_edges_from(L.intra_pairs_iter())
-    G.add_edges_from(R.intra_pairs_iter())
-    return {i: Point(*p) for i,p in nx.layout.spring_layout(G,seed=0,k=0.1).items()}
+    G.add_nodes_from(range(len(L)))
+    G.add_weighted_edges_from([
+        (i,j,3.0)
+        for i,j in (L*R).intra_pairs_iter()
+    ])
+    G.add_weighted_edges_from([
+        (i,j,weightL)
+        for i,j in L.intra_pairs_iter()
+    ])
+    G.add_weighted_edges_from([
+        (i,j,weightR)
+        for i,j in R.intra_pairs_iter()
+    ])
+    return {i: Point(*p) for i,p in nx.layout.spring_layout(G,seed=seed,k=k,weight='weight').items()}
 
-# Generate the figures
-for i,rule in zip(range(1,5),rules):
-    figL,axL=plt.subplots(1,1,figsize=(5,5))
-    figR,axR=plt.subplots(1,1,figsize=(5,5))
+# Tweak these to get the desired layout
+layout_argss = [
+    {},
+    {'k': 1.6, 'seed': 3},
+    {},
+    {'k': 0.08, 'seed': 4, 'weightL': 4.1, 'weightR': 1.5}
+]
+
+def show_rule(rule,rule_nr,**layout_args):
+    figL, axL = plt.subplots(1, 1, figsize=(5, 5))
+    figR, axR = plt.subplots(1, 1, figsize=(5, 5))
     axL.axis('off')
     axR.axis('off')
 
-    G = nx.Graph()
-    G.add_edges_from(rule['L'].intra_pairs_iter())
-    G.add_edges_from(rule['R'].intra_pairs_iter())
-    graph_layout={i: Point(*p) for i,p in nx.layout.spring_layout(G,seed=0,k=0.1).items()}
+    layout = graph_layout(rule['L'], rule['R'], **layout_args)
 
-    plot_clusterings(rule['gt'],rule['L'],layout=graph_layout,ax=axL,buffer=0.16)
-    plot_clusterings(rule['gt'],rule['R'],layout=graph_layout,ax=axR,buffer=0.16)
-    figL.savefig('rule{}L.pdf'.format(i))
-    figR.savefig('rule{}R.pdf'.format(i))
+    plot_clusterings(rule['gt'], rule['L'], layout=layout, ax=axL, buffer=0.16)
+    plot_clusterings(rule['gt'], rule['R'], layout=layout, ax=axR, buffer=0.16)
+    figL.savefig('rule{}L.pdf'.format(rule_nr))
+    figR.savefig('rule{}R.pdf'.format(rule_nr))
+
+# Generate the figures
+for rule,i,layout_args in zip(rules,range(1,5),layout_argss):
+    show_rule(rule,i,**layout_args)
