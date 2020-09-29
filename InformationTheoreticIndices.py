@@ -77,6 +77,27 @@ class FairNMI(NormalizedMutualInformation):
 from sklearn.metrics import adjusted_mutual_info_score
 class AdjustedMutualInformation(Score):
     @classmethod
-    def score(cls, A, B):
+    def score_alt(cls, A, B,average_method='geometric'):
         A, B = (Clustering.FromAnything(C) for C in [A,B])
-        return adjusted_mutual_info_score(A,B)
+        return adjusted_mutual_info_score(A,B,average_method=average_method)
+    @classmethod
+    def score(cls,A,B):
+        from scipy.special import binom
+        A, B = (Clustering.FromAnything(C) for C in [A, B])
+        cont = Contingency(A, B)
+        entropyA = Entropy(cont.sizesA)
+        entropyB = Entropy(cont.sizesB)
+        entropyJoint = Entropy(list(cont.values()))
+        # Computation of expected mutual information
+        n=cont.n
+        exp=0
+        for a in A.sizes():
+            b_sum = 0
+            for b in B.sizes():
+                n_ij_sum=0
+                # Exclude 0
+                for n_ij in range(max(1,a+b-n),min(a,b)+1):
+                    n_ij_sum += binom(n,n_ij)*binom(n-n_ij,a-n_ij)*binom(n-a,b-n_ij)*(n_ij/n)*np.log((n_ij*n)/(a*b))
+                b_sum += n_ij_sum/binom(n,b)
+            exp += b_sum / binom(n,a)
+        return Fraction(entropyA+entropyB-entropyJoint-exp,np.sqrt(entropyA*entropyB)-exp)
