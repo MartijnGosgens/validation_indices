@@ -24,7 +24,7 @@ B = [[0,2],[1]]
 }
 ```
 
-The statistical test as described in the Appendix of [our paper](https://arxiv.org/abs/1911.04773) can be applied to an index (e.g. NMI in the example) in the following way:
+The statistical test as described in the Appendix of our paper can be applied to an index (e.g. NMI in the example) in the following way:
 ```python
 from validation_indices import NamedIndices
 from validation_indices.ConstantBaselineTests import check_constant_baseline
@@ -69,20 +69,11 @@ By running `check_minimum_coverage.py` we obtain a table that shows for each pai
 
 ## Experiments with datasets
 
-The module `datasets_experiments` performs the clustering experiments on datasets to show the inconsistencies among the validation indices.
+The module `datasets_experiments` performs the clustering experiments on datasets to show the inconsistencies among the validation indices. The full experiment can be performed by running the file `perform_experiment.py`. This will generate 3 `.txt` files containing the latex code from the tables in the paper.
 
-The experiment is done in two steps:
+The `perform_experiment.py` file makes use of a few other scripts in the `datasets_experiments` folder:
 
-* In the first step, we use the selected algorithms to cluster the selected datasets and compute the validation score for each validation index.
-
-* In the second step, we compute the inconsistencies between the validation indices on these results.
-
-More specifically, in the first step:
-
-`parse_datasets.py` retrieves the datasets from [this repository](https://github.com/deric/clustering-benchmark/tree/master/src/main/resources/datasets/real-world). `clusterize.py` performs runs the clustering algorithms and `full_compare.py` computes the score for each validation index.
-
-The remaining 3 files process these scores to summarize inconsistencies:
-
-* `stats_realworld.py` computes the inconsistencies of the indices on the results of real-world data.
-* `stats_realworld_iris.py` computes the inconsistencies of the indices on the iris dataset alone.
-* `stats.py` computes the inconsistencies among all datasets.
+* The file `parse_realworld_datasets.py` contains the function `parse_datasets()` that retrieves a number of datasets from [this repository](https://github.com/deric/clustering-benchmark/tree/master/src/main/resources/datasets/real-world) and parses them.
+* The file `apply_clustering_algorithms.py`  contains the function `apply_clustering_algorithms()`that takes these datasets and applies a number of clustering algorithms to them to obtain a large number of candidate clusterings.
+* The file `compute_indices.py` contains the function `compute_indices()` that takes all these obtained clusterings and computes their similarity to the ground truth with respect to each validation index. The results will be stored in the file `all_datasets_methods_metrics.tsv`.
+* The file `count_agreements.py` contains various functions to process the values in `all_datasets_methods_metrics.tsv` to obtain the tables listed in the paper.

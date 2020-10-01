@@ -77,11 +77,11 @@ class FairNMI(NormalizedMutualInformation):
 from sklearn.metrics import adjusted_mutual_info_score
 class AdjustedMutualInformation(Score):
     @classmethod
-    def score_alt(cls, A, B,average_method='geometric'):
+    def score(cls, A, B,average_method='geometric'):
         A, B = (Clustering.FromAnything(C) for C in [A,B])
         return adjusted_mutual_info_score(A,B,average_method=average_method)
     @classmethod
-    def score(cls,A,B):
+    def score_alt(cls,A,B):
         from scipy.special import binom
         A, B = (Clustering.FromAnything(C) for C in [A, B])
         cont = Contingency(A, B)
