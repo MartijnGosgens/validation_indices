@@ -106,7 +106,7 @@ def print_kmeans_preferences(idx2latex=idx2latex):
     import sys
     stdout_orig = sys.stdout
     sys.stdout = open("preferences.txt","w")
-    print("&".join(['']+idx2latex.values())+r'\\')
+    print("&".join(['']+list(idx2latex.values()))+r'\\')
     for k,idx2count in get_kmeans_preference().items():
         print("&".join([k]+[str(idx2count[idx]) for idx in idx2latex.keys()])+r'\\')
     sys.stdout = stdout_orig

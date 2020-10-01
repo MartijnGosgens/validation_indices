@@ -55,12 +55,12 @@ def algorithms_gtk(gtk,n):
 	algorithms = {}
 	algorithms.update(algorithms_no_args)
 	algorithms.update({
-		'cl_kmeans_'+k: lambda features: do_kmeans(features,nc=k)
-		for k in ks
+		'cl_kmeans_'+k_name: lambda features: do_kmeans(features,nc=k)
+		for k_name,k in ks.items()
 	})
 	algorithms.update({
-		'cl_birch_'+k: lambda features: do_birch(features,nc=k)
-		for k in ks
+		'cl_birch_'+k_name: lambda features: do_birch(features,nc=k)
+		for k_name,k in ks.items()
 	})
 	for linkage in ('ward', 'average', 'complete', 'single'):
 		algorithms.update({
