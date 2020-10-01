@@ -9,6 +9,7 @@ from sklearn.mixture import GaussianMixture
 np.random.seed(0)
 
 def do_kmeans(ft,nc,ni=10):
+	print("Starting kmeans with k =",nc)
 	k_means = KMeans(init='k-means++', n_clusters=nc, n_init=ni)
 	k_means.fit(ft)
 	return k_means.labels_
@@ -55,21 +56,21 @@ def algorithms_gtk(gtk,n):
 	algorithms = {}
 	algorithms.update(algorithms_no_args)
 	algorithms.update({
-		'cl_kmeans_'+k_name: lambda features: do_kmeans(features,nc=k)
+		'cl_kmeans_'+k_name: (do_kmeans,{"nc": k})
 		for k_name,k in ks.items()
 	})
 	algorithms.update({
-		'cl_birch_'+k_name: lambda features: do_birch(features,nc=k)
+		'cl_birch_'+k_name: (do_birch, {'nc':k})
 		for k_name,k in ks.items()
 	})
 	for linkage in ('ward', 'average', 'complete', 'single'):
 		algorithms.update({
-			"cl_aggcl_{}_{}".format(linkage,k_name): lambda features: do_agglomerativeclustering(features,nc=k,linkage=linkage)
+			"cl_aggcl_{}_{}".format(linkage,k_name): (do_agglomerativeclustering,{'nc':k,'linkage':linkage})
 			for k_name,k in ks.items()
 		})
 	for cov in ['spherical', 'diag', 'tied', 'full']:
 		algorithms.update({
-			"cl_gmm_{}_{}".format(cov, k_name): lambda features: do_gausianmixture(features, nc=k, cov=cov)
+			"cl_gmm_{}_{}".format(cov, k_name): (do_gausianmixture,{'nc': k, 'cov': cov})
 			for k_name,k in ks.items()
 		})
 	return algorithms
@@ -82,13 +83,17 @@ def apply_clustering_algorithms():
 		print(fn,'gtk =', gtk)
 		algorithms = algorithms_gtk(gtk,len(gt))
 		for name,algorithm in algorithms.items():
+			# Retrieve arguments (if passed)
+			kwargs = dict()
+			if isinstance(algorithm,tuple):
+				algorithm,kwargs = algorithm
 			result_fn = fn.replace('parsed','candidates')[:-2]+name
 			# See whether result has already been computed
 			if os.path.isfile(result_fn):
 				print(name,'already exists')
 				continue
 			try:
-				result = algorithm(features)
+				result = algorithm(features,**kwargs)
 				candidate_k = len(set(result))
 				# Disregard results if one cluster is returned
 				if candidate_k <= 1:

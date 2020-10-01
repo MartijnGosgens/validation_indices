@@ -19,7 +19,7 @@ idx2latex = {
     'AdjustedRandIndex': 'AR',
     'JaccardIndex': 'J',
     'WallaceIndex': 'W',
-    'SokalAndSneath1': r'S\&S1',
+    'SokalAndSneath1': r'S\&S',
     'PearsonCoefficient': 'CC',
     'FMeasure': 'FMeas',
     'BCubed': 'BCub'
@@ -29,7 +29,7 @@ idx2latex_mini = {
     'AvgNMI': r'\textbf{NMI}',
     'VariationOfInformation': r'\textbf{VI}',
     'AdjustedRandIndex': r'\textbf{AR}',
-    'SokalAndSneath1': r'S\&S1',
+    'SokalAndSneath1': r'S\&S',
     'PearsonCoefficient': r'\textbf{CC}',
 }
 
