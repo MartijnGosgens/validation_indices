@@ -1,5 +1,5 @@
 # README
-All indices that are discussed in [the paper](https://arxiv.org/abs/1911.04773) (except SMI, which requires a lot of computation and is implemented by its original authors in Matlab) can be found in the list `Indices`. It can be obtained via
+All indices that are discussed in the paper (except SMI, which requires a lot of computation and is implemented by its original authors in Matlab) can be found in the list `Indices`. It can be obtained via
 
 ```python
 from validation_indices import Indices
@@ -57,6 +57,11 @@ check_constant_baseline(
 To generate the figures showing the inconsistencies between the indices, simply run the file `InconsistencyVisualizations.py`. This can be done in the following way:
 ```python
 from validation_indices.InconsistencyVisualizations import *
+```
+
+To generate the figures for the constant baseline experiments in the appendix, simply run the file `ConstantBaselineExperiments.py` in the following way:
+```python
+from validation_indices.ConstantBaselineExperiments import *
 ```
 
 ## Experiments with synthetic datasets
